@@ -7,7 +7,7 @@ import logging
 
 import pytest
 from OCC import TopoDS
-from OCCUtils import Topo
+from OCCUtils.Topology import Topo
 
 from OCCDataExchange.stl import StlImporter
 from OCCDataExchange.utils import path_from_file
@@ -50,7 +50,7 @@ def test_stl_importer_happy_topology():
     topo = Topo(importer.shape)
     # assert len(topo.solids()) == 1
     assert len([i for i in topo.shells()]) == 1
-    assert topo.shells().next().Closed() is True  # direct method on TopoDS_Shell
+    assert next(topo.shells()).Closed() is True  # direct method on TopoDS_Shell
     assert len([i for i in topo.faces()]) == 108
     assert len([i for i in topo.edges()]) == 162
 
@@ -59,7 +59,7 @@ def test_stl_importer_happy_topology():
     topo = Topo(importer.shape)
     # assert len(topo.solids) == 1
     assert len([i for i in topo.shells()]) == 1
-    assert topo.shells().next().Closed() is True
+    assert next(topo.shells()).Closed() is True
     assert len([i for i in topo.faces()]) == 108
     assert len([i for i in topo.edges()]) == 162
 
@@ -77,7 +77,7 @@ def test_stl_importer_2_boxes():
 
     topo = Topo(importer.shape)
     assert len([i for i in topo.shells()]) == 2
-    assert topo.shells().next().Closed() is True
+    assert next(topo.shells()).Closed() is True
     assert [i for i in topo.shells()][1].Closed() is True
     assert topo.number_of_faces() == 108 * 2
     assert topo.number_of_edges() == 162 * 2
@@ -87,7 +87,7 @@ def test_stl_importer_2_boxes():
 
     topo = Topo(importer.shape)
     assert len([i for i in topo.shells()]) == 2
-    assert topo.shells().next().Closed() is True
+    assert next(topo.shells()).Closed() is True
     assert [i for i in topo.shells()][1].Closed() is True
     assert topo.number_of_faces() == 108 * 2
     assert topo.number_of_edges() == 162 * 2

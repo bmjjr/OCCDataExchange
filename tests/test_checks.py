@@ -7,7 +7,7 @@ import pytest
 from OCC import BRepBuilderAPI
 from OCC import TopoDS
 from OCC import gp
-from OCCUtils import Topo
+from OCCUtils.Topology import Topo
 
 from OCCDataExchange.checks import check_importer_filename, check_exporter_filename, check_overwrite, check_shape
 from OCCDataExchange.utils import path_from_file
@@ -84,6 +84,6 @@ def test_check_shape():
     check_shape(shape)
 
     # a subclass of shape should not raise any exception
-    check_shape(Topo(shape).edges().next())
+    check_shape(next(Topo(shape).edges()))
 
 

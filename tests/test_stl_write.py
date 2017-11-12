@@ -11,7 +11,7 @@ import logging
 from OCC import BRepPrimAPI
 from OCC import gp
 from OCC import TopoDS
-from OCCUtils import Topo
+from OCCUtils.Topology import Topo
 from OCCUtils.types_lut import ShapeToTopology
 
 from OCCDataExchange.stl import StlExporter, StlImporter
@@ -69,7 +69,7 @@ def test_stl_exporter_adding_not_a_shape(box_shape):
 
 def test_stl_exporter_happy_path(box_shape):
     r"""Happy path"""
-    filename = path_from_file(__file__, "./models_out/box.sTl")
+    filename = path_from_file(__file__, "./models_out/box.stl")
     exporter = StlExporter(filename)
     exporter.set_shape(box_shape)
     exporter.write_file()

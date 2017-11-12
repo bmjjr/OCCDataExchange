@@ -8,7 +8,7 @@ import logging
 import pytest
 from OCC import TopAbs
 from OCC import TopoDS
-from OCCUtils import Topo
+from OCCUtils.Topology import Topo
 
 from OCCDataExchange.step import StepImporter
 from OCCDataExchange.utils import path_from_file
