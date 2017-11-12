@@ -8,7 +8,7 @@ import logging
 from OCC import BRepPrimAPI
 
 from OCCDataExchange.iges import IgesExporter
-from OCCDataExchange import path_from_file
+from OCCDataExchange.utils import path_from_file
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s :: %(levelname)6s :: %(module)20s :: %(lineno)3d :: %(message)s')

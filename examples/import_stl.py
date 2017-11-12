@@ -5,10 +5,10 @@ r"""Importing STL"""
 
 import logging
 
-from OCCUtils import Topo
-
+from OCCUtils.Topology import Topo
+from OCC.Display import SimpleGui
 from OCCDataExchange.stl import StlImporter
-from OCCDataExchange import path_from_file
+from OCCDataExchange.utils import path_from_file
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s :: %(levelname)6s :: %(module)20s :: %(lineno)3d :: %(message)s')

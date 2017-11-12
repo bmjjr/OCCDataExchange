@@ -6,10 +6,10 @@ r"""Importing BREP"""
 import logging
 
 from OCC.Display import SimpleGui
-from OCCUtils import Topo
+from OCCUtils.Topology import Topo
 
 from OCCDataExchange.brep import BrepImporter
-from OCCDataExchange import path_from_file
+from OCCDataExchange.utils import path_from_file
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s :: %(levelname)6s :: %(module)20s :: %(lineno)3d :: %(message)s')
@@ -25,7 +25,7 @@ display, start_display, add_menu, add_function_to_menu = SimpleGui.init_display(
 
 # 1 solid to display
 
-for s in Topo(the_shape):
+for s in Topo(the_shape).solids():
     display.DisplayShape(s)
 
 # faces
