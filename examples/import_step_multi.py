@@ -20,8 +20,8 @@ display, start_display, add_menu, add_function_to_menu = SimpleGui.init_display(
 # filename = OCCDataExchange.path_from_file(__file__, "./models_in/step/dm1-id-214.stp")
 # filename = OCCDataExchange.path_from_file(__file__, "./models_in/step/APB_GC.stp")  # big file 50 Mb !
 # filename = OCCDataExchange.path_from_file(__file__, "./models_in/step/66m.stp")
-# filename = path_from_file(__file__, "./models_in/step/ASA.STEP")
-filename = path_from_file(__file__, "./models_in/step/solar_charger_asm.stp")
+filename = path_from_file(__file__, "./models_in/step/ASA.STEP")
+# filename = path_from_file(__file__, "./models_in/step/solar_charger_asm.stp")
 # filename = OCCDataExchange.path_from_file(__file__, "./models_in/step/Groupama_VO70.stp")
 step_importer = StepImporter(filename)
 
