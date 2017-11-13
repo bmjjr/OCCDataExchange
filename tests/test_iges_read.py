@@ -7,7 +7,7 @@ import logging
 
 import pytest
 from OCC import TopoDS
-from OCCUtils import Topo
+from OCCUtils.Topology import Topo
 
 from OCCDataExchange.iges import IgesImporter
 from OCCDataExchange.utils import path_from_file

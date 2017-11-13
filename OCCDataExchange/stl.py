@@ -9,7 +9,7 @@ import logging
 
 from OCC import StlAPI
 from OCC import TopoDS
-
+from OCC.BRepMesh import BRepMesh_IncrementalMesh
 from OCCDataExchange.checks import check_importer_filename, check_exporter_filename, check_overwrite, check_shape
 from OCCDataExchange.extensions import stl_extensions
 
@@ -56,12 +56,22 @@ class StlExporter(object):
 
     Parameters
     ----------
-    filename : str
-    ascii_mode : bool
-        (default is False)
+    :param: filename: str
+    :param: ascii_mode : bool (default is False)
+    :param: line_deflection: float: default 0.9: linear deflection for meshing
+        the shape (default is 0.9)
+    :param: is_relative: bool: default False: if True deflection used for
+        discretization of each edge will be <line_deflection> * <size of edge>.
+        Deflection used for the faces will be the maximum deflection of their
+        edges.
+    :param: angular_deflection: float: default 0.5
+    :param: in_parallel: bool: default False: if True shape will be meshed
+        in parallel
+
     """
 
-    def __init__(self, filename=None, ascii_mode=False):
+    def __init__(self, filename=None, ascii_mode=False, line_deflection=0.9,
+                 is_relative=False, angular_deflection=0.5, in_parallel=False):
         logger.info("StlExporter instantiated with filename : %s" % filename)
         logger.info("StlExporter ascii : %s" % str(ascii_mode))
 
@@ -71,6 +81,10 @@ class StlExporter(object):
         self._shape = None  # only one shape can be exported
         self._ascii_mode = ascii_mode
         self._filename = filename
+        self._line_deflection = line_deflection
+        self._is_relative = is_relative
+        self._angular_deflection = angular_deflection
+        self._in_parallel = in_parallel
 
     def set_shape(self, a_shape):
         """
@@ -86,6 +100,11 @@ class StlExporter(object):
 
     def write_file(self):
         r"""Write file"""
+        mesh = BRepMesh_IncrementalMesh(
+            self._shape, self._line_deflection, self._is_relative,
+            self._angular_deflection, self._in_parallel)
+        mesh.Perform()
         stl_writer = StlAPI.StlAPI_Writer()
-        stl_writer.Write(self._shape, self._filename, self._ascii_mode)
+        stl_writer.SetASCIIMode(self._ascii_mode)
+        stl_writer.Write(self._shape, self._filename)
         logger.info("Wrote STL file")

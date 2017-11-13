@@ -10,7 +10,7 @@ import glob
 from OCC import BRepPrimAPI
 from OCC import gp
 from OCC import TopoDS
-from OCCUtils import Topo
+from OCCUtils.Topology import Topo
 from OCCUtils.types_lut import ShapeToTopology
 
 from OCCDataExchange.step import StepExporter, StepImporter

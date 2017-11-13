@@ -8,10 +8,10 @@ from __future__ import print_function
 import logging
 
 from OCC.Display import SimpleGui
-from OCCUtils import Topo
+from OCCUtils.Topology import Topo
 
 from OCCDataExchange.iges import IgesImporter
-from OCCDataExchange import path_from_file
+from OCCDataExchange.utils import path_from_file
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s :: %(levelname)6s :: %(module)20s :: %(lineno)3d :: %(message)s')

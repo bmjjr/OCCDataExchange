@@ -10,7 +10,7 @@ import pytest
 from OCC import BRepPrimAPI
 from OCC import TopoDS
 from OCC import gp
-from OCCUtils import Topo
+from OCCUtils.Topology import Topo
 from OCCUtils.types_lut import ShapeToTopology
 
 from OCCDataExchange.iges import IgesExporter, IgesImporter

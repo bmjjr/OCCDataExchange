@@ -6,11 +6,10 @@ r"""Importing single shape from IGES"""
 from __future__ import print_function
 
 import logging
-
-from OCCUtils import Topo
-
+from OCC.Display import SimpleGui
+from OCCUtils.Topology import Topo
 from OCCDataExchange.iges import IgesImporter
-from OCCDataExchange import path_from_file
+from OCCDataExchange.utils import path_from_file
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s :: %(levelname)6s :: %(module)20s :: %(lineno)3d :: %(message)s')
