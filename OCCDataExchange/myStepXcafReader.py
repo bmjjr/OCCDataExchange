@@ -40,7 +40,7 @@ from OCC import TDocStd
 from OCC import TopLoc
 from OCC import XCAFApp
 from OCC import XCAFDoc
-from OCCUtils import Topo
+from OCCUtils.Topology import Topo
 
 logger = logging.getLogger(__name__)
 logger.setLevel(20)  # 20 for info only
@@ -246,9 +246,9 @@ class StepXcafImporter(object):
                 elif shapeType == 0:
                     logger.debug("The shape type is TopAbs.TopAbs_COMPOUND")
                     topo = Topo(shape)
-                    logger.debug("Nb of compounds : %i" % topo.number_of_compounds)
-                    logger.debug("Nb of solids : %i" % topo.number_of_solids)
-                    logger.debug("Nb of shells : %i" % topo.number_of_shells)
+                    logger.debug("Nb of compounds : %i" % topo.number_of_compounds())
+                    logger.debug("Nb of solids : %i" % topo.number_of_solids())
+                    logger.debug("Nb of shells : %i" % topo.number_of_shells())
                     newAssyUID = self.getNewUID()
                     for i, solid in enumerate(topo.solids):
                         name = "P%s" % str(i + 1)

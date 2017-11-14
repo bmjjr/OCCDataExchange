@@ -25,7 +25,7 @@
 #
 
 
-from __future__ import absolute_import
+
 
 import os
 import os.path
@@ -37,10 +37,11 @@ from OCC.AIS import AIS_Shape
 from OCC.BRepFilletAPI import BRepFilletAPI_MakeFillet
 from OCC.BRepOffsetAPI import BRepOffsetAPI_MakeThickSolid
 from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeCylinder
+from OCC.BRep import BRep_Tool_Surface
 from OCC.Geom import Handle_Geom_Plane
 from OCC.TopTools import TopTools_ListOfShape
 from OCC.TopoDS import topods_Edge, topods_Face
-
+from OCC.Quantity import Quantity_NOC_BLACK
 # from PyQt4.QtCore import *
 # from PyQt4.QtGui import *
 from PyQt5 import Qt
@@ -48,14 +49,16 @@ from PyQt5.QtCore import QPersistentModelIndex, QModelIndex, pyqtSlot, QPoint, p
 from PyQt5.QtWidgets import (QTreeWidget, QMenu, QAbstractItemView, QDockWidget, QLabel, QLineEdit, QMainWindow,
                              QMenuBar, QTreeWidgetItem, QInputDialog, QAction, QApplication, QDesktopWidget,
                              QFileDialog)
-
+from OCC.Display.backend import get_qt_modules, load_backend
+from OCC.Display import OCCViewer
 from OCCDataExchange.myStepXcafReader import StepXcafImporter
 
-print "OCC version: %s" % VERSION
+
+print(("OCC version: %s" % VERSION))
 
 # 'used_backend' needs to be defined prior to importing qtViewer3D
 # if VERSION < "0.16.5":
-used_backend = OCC.Display.backend.get_backend()
+used_backend = load_backend()
 # elif VERSION == "0.16.5":
 #     used_backend = OCC.Display.backend.load_backend()
 # else:
@@ -63,7 +66,6 @@ used_backend = OCC.Display.backend.get_backend()
 #     print "OCC Version = %s" % OCC.VERSION
 
 from OCC.Display import qtDisplay
-from OCC.Display.backend import get_qt_modules
 
 QtCore, QtGui, QtWidgets, QtOpenGL = get_qt_modules()
 
@@ -130,7 +132,7 @@ class TreeList(QTreeWidget):  # With 'drag & drop' ; context menu
         self.setDragDropMode(self.InternalMove)
         self.setDragEnabled(True)
         self.setDropIndicatorShown(True)
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.setContextMenuPolicy(Qt.Qt.CustomContextMenu)
         # self.connect(self, SIGNAL("customContextMenuRequested(QPoint)"),
         #              self.contextMenu)
         self.popMenu = QMenu(self)
@@ -145,7 +147,7 @@ class TreeList(QTreeWidget):  # With 'drag & drop' ; context menu
             QAbstractItemView.dropEvent(self, event)
 
     def dropMimeData(self, parent, row, data, action):
-        if action == Qt.MoveAction:
+        if action == Qt.Qt.MoveAction:
             return self.moveSelection(parent, row)
         return False
 
@@ -191,10 +193,10 @@ class TreeList(QTreeWidget):  # With 'drag & drop' ; context menu
 
 class MainWindow(QMainWindow):
     def __init__(self, *args):
-        apply(QMainWindow.__init__, (self,) + args)
+        QMainWindow.__init__(self, *args)
         self.canva = MyqtViewer3d(self)
         self.setCentralWidget(self.canva)
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.setContextMenuPolicy(Qt.Qt.CustomContextMenu)
         self.setWindowTitle("Simple CAD App using pythonOCC-%s ('qt' backend)" % VERSION)
         self.resize(1024, 768)
 
@@ -214,7 +216,7 @@ class MainWindow(QMainWindow):
         # -------------------------------------------------------------------------------
         # status bar / line edit
         # -------------------------------------------------------------------------------
-
+        self.unitsLabel = QLabel()
         # self.unitsLabel.setFrameStyle(QFrame.StyledPanel|QFrame.Sunken)
         self.lineEdit = QLineEdit()
         self.lineEditStack = []  # list of user inputs
@@ -249,10 +251,10 @@ class MainWindow(QMainWindow):
 
         self.treeDockWidget = QDockWidget("Assy/Part Structure", self)
         self.treeDockWidget.setObjectName("treeDockWidget")
-        self.treeDockWidget.setAllowedAreas(Qt.LeftDockWidgetArea |
-                                            Qt.RightDockWidgetArea)
+        self.treeDockWidget.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea |
+                                            QtCore.Qt.RightDockWidgetArea)
         self.treeDockWidget.setWidget(self.asyPrtTree)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.treeDockWidget)
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.treeDockWidget)
 
         self.popMenu = QMenu(self)
         self._menus = {}
@@ -269,7 +271,6 @@ class MainWindow(QMainWindow):
 
         # place the window in the center of the screen, at half the screen size
         self.centerOnScreen()
-        self.unitsLabel = QLabel()
         self.unitsLabel.setText("Units: mm ")
 
         self.currentOp = None  # current operation
@@ -319,14 +320,14 @@ class MainWindow(QMainWindow):
         action = self.popMenu.exec_(self.mapToGlobal(point))
 
     def getPartsInAssy(self, uid):
-        if uid not in self._assyDict.keys():
-            print "This node is not an assembly"
+        if uid not in list(self._assyDict.keys()):
+            print("This node is not an assembly")
         else:
             asyPrtTree = []
             leafNodes = self.tree.leaves(uid)
             for node in leafNodes:
                 pid = node.identifier
-                if pid in self._partDict.keys():
+                if pid in list(self._partDict.keys()):
                     asyPrtTree.append(pid)
             return asyPrtTree
 
@@ -341,10 +342,10 @@ class MainWindow(QMainWindow):
         Returns list of checked (part) items in treeView
         """
         dl = []
-        for item in self.asyPrtTree.findItems("", Qt.MatchContains | Qt.MatchRecursive):
+        for item in self.asyPrtTree.findItems("", Qt.Qt.MatchContains | Qt.Qt.MatchRecursive):
             if item.checkState(0) == 2:
                 uid = int(item.text(1))
-                if uid in self._partDict.keys():
+                if uid in list(self._partDict.keys()):
                     dl.append(uid)
         return dl
 
@@ -361,13 +362,13 @@ class MainWindow(QMainWindow):
         self.drawList = self.checkedToList()
 
     def syncCheckedToDrawList(self):
-        for item in self.asyPrtTree.findItems("", Qt.MatchContains | Qt.MatchRecursive):
+        for item in self.asyPrtTree.findItems("", Qt.Qt.MatchContains | Qt.Qt.MatchRecursive):
             itemUid = int(item.text(1))
             if itemUid in self._partDict:
                 if itemUid in self.drawList:
-                    item.setCheckState(0, Qt.Checked)
+                    item.setCheckState(0, Qt.Qt.Checked)
                 else:
-                    item.setCheckState(0, Qt.Unchecked)
+                    item.setCheckState(0, Qt.Qt.Unchecked)
 
     def setActive(self):  # Set item clicked in treeView Active
         item = self.itemClicked
@@ -422,7 +423,7 @@ class MainWindow(QMainWindow):
     ####  CAD model related methods:
 
     def printCurrUID(self):
-        print self._currentUID
+        print(self._currentUID)
 
     def getNewPartUID(self, OCCpartObject, name="", ancestor=0, color=None):
         """
@@ -443,16 +444,16 @@ class MainWindow(QMainWindow):
         self._partDict[uid] = OCCpartObject
         self._nameDict[uid] = name
         if color:
-            c = OCC.Display.OCCViewer.color(color.Red(), color.Green(), color.Blue())
+            c = OCCViewer.color(color.Red(), color.Green(), color.Blue())
         else:
-            c = OCC.Display.OCCViewer.color(.2, .1, .1)  # default color
+            c = OCCViewer.color(.2, .1, .1)  # default color
         self._colorDict[uid] = c
         self._ancestorDict[uid] = ancestor
         # add item to treeView
         itemName = [name, str(uid)]
         item = QTreeWidgetItem(self.asyPrtTreeRoot, itemName)
-        item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
-        item.setCheckState(0, Qt.Checked)
+        item.setFlags(item.flags() | Qt.Qt.ItemIsUserCheckable)
+        item.setCheckState(0, Qt.Qt.Checked)
         # add node to treeModel
         self.tree.create_node(name,
                               uid,
@@ -467,7 +468,7 @@ class MainWindow(QMainWindow):
         return uid
 
     def appendToStack(self):  # text input stack
-        self.lineEditStack.append(unicode(self.lineEdit.text()))
+        self.lineEditStack.append(str(self.lineEdit.text()))
         self.lineEdit.clear()
         if self.currentOp:
             self.dispatch()
@@ -490,7 +491,7 @@ class MainWindow(QMainWindow):
         else:
             self.currentOp = currOp
             initial = True  # called by a triggered button (w/ arg)
-        print "%s dispatched" % currOp
+        print("%s dispatched" % currOp)
         if initial:
             func = "%s(True)" % currOp
         else:
@@ -520,7 +521,7 @@ class MainWindow(QMainWindow):
         context.RemoveAll()
         context.SetAutoActivateSelection(False)
         for uid in self.drawList:
-            if uid in self._transparencyDict.keys():
+            if uid in list(self._transparencyDict.keys()):
                 transp = self._transparencyDict[uid]
             else:
                 transp = 0
@@ -530,12 +531,12 @@ class MainWindow(QMainWindow):
             context.Display(h_aisShape)
             context.SetColor(h_aisShape, color)
             context.SetTransparency(h_aisShape, transp)
-            context.HilightWithColor(h_aisShape, OCC.Quantity.Quantity_NOC_BLACK)
-        print 'Redrawing'
+            context.HilightWithColor(h_aisShape, Quantity_NOC_BLACK)
+        print('Redrawing')
 
     def drawAll(self):
         self.drawList = []
-        for k in self._partDict.keys():
+        for k in list(self._partDict.keys()):
             self.drawList.append(k)
         self.syncCheckedToDrawList()
         self.redraw()
@@ -578,7 +579,7 @@ class MainWindow(QMainWindow):
         prompt = 'Select STEP file to import'
         fname = QFileDialog.getOpenFileName(None, prompt, './', "STEP files (*.stp *.STP *.step)")
         if not fname:
-            print "Load step cancelled"
+            print("Load step cancelled")
             return
         fname = str(fname)
         name = os.path.basename(fname).split('.')[0]
@@ -597,7 +598,7 @@ class MainWindow(QMainWindow):
                 else:
                     parentItem = partTreeDict[parentUid]
                 item = QTreeWidgetItem(parentItem, itemName)
-                item.setFlags(item.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+                item.setFlags(item.flags() | Qt.Qt.ItemIsTristate | Qt.Qt.ItemIsUserCheckable)
                 self.asyPrtTree.expandItem(item)
                 partTreeDict[uid] = item
                 Loc = node.data['l']  # Location object
@@ -609,8 +610,8 @@ class MainWindow(QMainWindow):
                 else:
                     parentItem = partTreeDict[parentUid]
                 item = QTreeWidgetItem(parentItem, itemName)
-                item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
-                item.setCheckState(0, Qt.Checked)
+                item.setFlags(item.flags() | Qt.Qt.ItemIsUserCheckable)
+                item.setCheckState(0, Qt.Qt.Checked)
                 partTreeDict[uid] = item
                 color = node.data['c']
                 shape = node.data['s']
@@ -618,15 +619,15 @@ class MainWindow(QMainWindow):
                 self._partDict[uid] = shape
                 self._nameDict[uid] = name
                 if color:
-                    c = OCC.Display.OCCViewer.color(color.Red(), color.Green(), color.Blue())
+                    c = OCCViewer.color(color.Red(), color.Green(), color.Blue())
                 else:
-                    c = OCC.Display.OCCViewer.color(.2, .1, .1)  # default color
+                    c = OCCViewer.color(.2, .1, .1)  # default color
                 self._colorDict[uid] = c
                 self.activePartUID = uid  # Set as active part
                 self.activePart = shape
                 self.drawList.append(uid)  # Add to draw list
         self.tree.paste(0, tree)  # Paste tree onto win.tree root
-        klist = self._partDict.keys()
+        klist = list(self._partDict.keys())
         klist.sort()
         klist.reverse()
         maxUID = klist[0]
@@ -656,7 +657,7 @@ def face_is_plane(face):
     """
     Returns True if the TopoDS_Shape is a plane, False otherwise
     """
-    hs = OCC.BRep.BRep_Tool_Surface(face)
+    hs = BRep_Tool_Surface(face)
     downcast_result = Handle_Geom_Plane.DownCast(hs)
     # The handle is null if downcast failed or is not possible, that is to say the face is not a plane
     if downcast_result.IsNull():
@@ -669,7 +670,7 @@ def geom_plane_from_face(aFace):
     """
     Returns the geometric plane entity from a planar surface
     """
-    return Handle_Geom_Plane.DownCast(OCC.BRep.BRep_Tool_Surface(aFace)).GetObject()
+    return Handle_Geom_Plane.DownCast(BRep_Tool_Surface(aFace)).GetObject()
 
 
 # Geometry modification functons...
@@ -737,29 +738,29 @@ def printActPart():
     uid = win.activePartUID
     if uid:
         name = win._nameDict[uid]
-        print "%s [uid=%i]" % (name, int(uid))
+        print("%s [uid=%i]" % (name, int(uid)))
     else:
-        print None
+        print(None)
 
 
 def printNameDict():
-    print win._nameDict
+    print(win._nameDict)
 
 
 def printPartDict():
-    print win._partDict
+    print(win._partDict)
 
 
 def printCurrOp():
-    print win.currentOp
+    print(win.currentOp)
 
 
 def printDrawList():
-    print win.drawList
+    print(win.drawList)
 
 
 def printInSync():
-    print win.inSync()
+    print(win.inSync())
 
 
 if __name__ == "__main__":

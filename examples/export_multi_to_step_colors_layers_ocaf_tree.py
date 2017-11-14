@@ -5,8 +5,8 @@ r"""Exporting multiple shapes to STEP with colors and layers"""
 
 import logging
 import os
-
 from OCCDataExchange.step_ocaf import StepOcafImporter
+from OCC.Display import SimpleGui
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s :: %(levelname)6s :: %(module)20s :: %(lineno)3d :: %(message)s')
@@ -20,12 +20,11 @@ the_layers_str = step.layers_str
 
 print("Number of shapes : %i " % len(the_shapes))
 
-from OCC.Display import SimpleGui
 display, start_display, add_menu, add_function_to_menu = SimpleGui.init_display()
 
 for i, shape in enumerate(the_shapes):
-    display.DisplayShape(shape, color=the_colors[i])
-    print(the_layers_str[i])
+    display.DisplayShape(shape, color=the_colors[i % len(the_colors)])
+    # print(the_layers[i])
 
 display.View_Iso()
 display.FitAll()
